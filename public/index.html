@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Screenshot & Thumbnail Generator</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0d0b1f;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: #0a0a1a;
+      padding: 30px 25px;
+      border-radius: 20px;
+      box-shadow: 0 0 25px #00e5ff;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .logo {
+      font-size: 42px;
+      font-weight: bold;
+      color: #00e5ff;
+      margin-bottom: 10px;
+    }
+    h2 {
+      margin: 10px 0;
+      font-size: 22px;
+      color: #00e5ff;
+    }
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      color: #aaa;
+      font-size: 14px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #1a1a2e;
+      color: #fff;
+      outline: none;
+      font-size: 14px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      background: #00e5ff;
+      color: #000;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #00c4dd;
+    }
+    #download {
+      background: #222;
+      color: #fff;
+      margin-top: 10px;
+    }
+    #download:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .preview {
+      margin-top: 15px;
+    }
+    .preview img {
+      width: 100%;
+      border-radius: 12px;
+      border: 2px solid #00e5ff;
+      margin-top: 10px;
+    }
+    footer {
+      margin-top: 15px;
+      font-size: 12px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">⚡</div>
+    <h2>Screenshot & Thumbnail Generator</h2>
+    <p style="color:#aaa;font-size:13px">Enter a URL and get a screenshot</p>
+
+    <label>Website URL</label>
+    <input id="url" placeholder="https://example.com" value="https://example.com" />
+
+    <div class="row">
+      <div>
+        <label>Width</label>
+        <input id="width" value="1280" />
+      </div>
+      <div>
+        <label>Height</label>
+        <input id="height" value="720" />
+      </div>
+    </div>
+
+    <label>Image type</label>
+    <select id="type">
+      <option value="png">PNG</option>
+      <option value="jpeg">JPEG</option>
+    </select>
+
+    <button id="capture">Capture Screenshot</button>
+    <button id="download" disabled>Download</button>
+
+    <div class="preview">
+      <p style="color:#aaa;font-size:13px">Preview</p>
+      <img id="previewImg" src="" alt="preview" />
+    </div>
+
+    <footer>
+      <small>Developed By ⚡ HJH Hacker 🔥</small>
+    </footer>
+  </div>
+
+  <script>
+    const captureBtn = document.getElementById('capture');
+    const downloadBtn = document.getElementById('download');
+    const preview = document.getElementById('previewImg');
+
+    captureBtn.addEventListener('click', async () => {
+      const url = encodeURIComponent(document.getElementById('url').value.trim());
+      const width = document.getElementById('width').value || 1280;
+      const height = document.getElementById('height').value || 720;
+      const type = document.getElementById('type').value || 'png';
+
+      if (!url) return alert('Enter a URL');
+
+      captureBtn.disabled = true;
+      captureBtn.textContent = 'Capturing…';
+
+      try {
+        const resp = await fetch(`/api/screenshot?url=${url}&width=${width}&height=${height}&type=${type}`);
+        if (!resp.ok) throw new Error('Server error ' + resp.status);
+        const blob = await resp.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        preview.src = objectUrl;
+        downloadBtn.disabled = false;
+
+        downloadBtn.onclick = () => {
+          const a = document.createElement('a');
+          a.href = objectUrl;
+          a.download = `screenshot.${type}`;
+          a.click();
+        };
+      } catch (err) {
+        alert('Capture failed: ' + err.message);
+      } finally {
+        captureBtn.disabled = false;
+        captureBtn.textContent = 'Capture Screenshot';
+      }
+    });
+  </script>
+</body>
+  </html>
